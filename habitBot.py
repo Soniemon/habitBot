@@ -8,7 +8,9 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
+#all permissions
 intents = discord.Intents.all()
+#gives discord bot all permissions
 client = discord.Client(intents=intents)
 
 @client.event
@@ -22,6 +24,7 @@ async def on_ready():
           f'{guild.name}(id: {guild.id})'
     )
     
+    #print names of all guild members
     members = '\n - '.join([member.name for member in guild.members])
     print(f'Guild Members:\n - {members}')
 

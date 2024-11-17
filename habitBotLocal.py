@@ -58,7 +58,6 @@ async def on_ready():
             break
 
 
-
     existing_category = discord.utils.get(guild.categories, name = "Habits")
     if not existing_category:
         print(f'Creating a new category: {"Habits"}')
@@ -69,10 +68,6 @@ async def on_ready():
         #await guild.create_text_channel("Memory", category=category, overwrites=overwrites)
         f = open("habits.txt",  "w")
         f.close()
-
-   
-
-
 
 @guildBot.command(name="showCommands") #Behavior when /help is detected in chat
 async def showCommands(ctx): #Ctx is a required parameter that contains information about the message, including the channel and guild and user that called the command
@@ -113,14 +108,6 @@ async def newHabit(ctx, habit_name):
         overwrites = {guild.default_role: discord.PermissionOverwrite(read_messages=False),
         member: discord.PermissionOverwrite(read_messages=True),
         }
-
-        """
-        if not server_collection.find_one({'habits' : habit_name}):
-            updateServer(GUILD,'',habit_name)
-        if not user_collection.find_one({'username' : str(member)}):
-            addUser(str(ctx.author))
-        if not user_collection.find_one({'habits' : { '$in' : [habit_name]}}):
-            updateUser(username=str(ctx.author),habit=habit_name, startDate='')"""
         await guild.create_text_channel(habit_name, category = category, overwrites=overwrites)
         
         
@@ -167,28 +154,31 @@ async def checkin(ctx):
     f.writelines(data)
     f.close()
 
+@guildBot.command(name="showGrid")
+async def showGrid(ctx):
+    filename = str(ctx.channel)
+    f = open(f"{filename}.txt", "r")
+    data = f.readlines()
+    names = []
+    userData = []
+    for items in data:
+        parts = items.partition(":")
+        names.append(parts[0])
+        userData.append(parts[2].strip())
+    groupGridShow(names, userData)
 
-        
-"""
+
 @guildBot.command(name = "join")
 async def join(ctx):
     guild = ctx.guild
     member = ctx.author
-    
-    if not user_collection.find_one({'username' : str(member)}):
-        addUser(str(ctx.author))
-    if not user_collection.find_one({'habits' : { '$in' : [str(ctx.channel)]}}):
-        updateUser(username=str(ctx.author),habit=str(ctx.channel), startDate='')
-"""
+
 
 
 @guildBot.command(name = "removeHabit")
 async def removeHabit(ctx, habit_name):
     guild = ctx.guild
     member = ctx.author
-
-    
-
 
     existing_habit = discord.utils.get(guild.channels, name = habit_name)
     if existing_habit:

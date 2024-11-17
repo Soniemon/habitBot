@@ -12,8 +12,6 @@ def groupGridShow(names, data):
      #print("How many Days back would you like to track?")#needs to match the number of rows in data being read. in this specific case, it's 12
      days = 7#int(input())
 
-     test = ['100100011011',
-          '111101110111']#getstring from data base, unadjusted
      translatedArray=[]#declare empty array to hold adjusted, integer array
      truncatedArray=[]
 

@@ -1,3 +1,4 @@
-soniemon:110111
-khoi:110101
-beedrillinurmom:000000
+soniemon:1101110
+khoi:1101011
+bgomi:0010001
+Noah:1100110

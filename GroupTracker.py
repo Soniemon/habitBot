@@ -7,76 +7,79 @@ from matplotlib.colors import ListedColormap
 from matplotlib import rcParams
 
 
-print("How many Days back would you like to track?")#needs to match the number of rows in data being read. in this specific case, it's 12
-days = int(input())
+def groupGridShow(names, data):
 
-str1 = ['100100011011',
-        '111101110111']#getstring from data base, unadjusted
-data=[]#declare empty array to hold adjusted, integer array
-data2=[]
+     #print("How many Days back would you like to track?")#needs to match the number of rows in data being read. in this specific case, it's 12
+     days = 7#int(input())
 
-#ADJUST 2D ARRAY
-for index in range(len(str1[0])): #read columns
-     rowData = []
-     for val in str1:
-          rowData.append(int(val[index]))
-     data.append(rowData)
+     test = ['100100011011',
+          '111101110111']#getstring from data base, unadjusted
+     translatedArray=[]#declare empty array to hold adjusted, integer array
+     truncatedArray=[]
 
-for rows in range (days, 0, -1):
-    data2.append(data[-rows])
+     #ADJUST 2D ARRAY
+     for index in range(len(data[0])): #read columns
+          rowData = []
+          for val in data:
+               rowData.append(int(val[index]))
+          translatedArray.append(rowData)
 
-##print(data2) #just checking
-#============================================================
+     for rows in range (days, 0, -1):
+          truncatedArray.append(translatedArray[-rows])
 
-axisArray = []
-for i in range(days):
-     axisArray.append(i+1)
-#print(axisArray)# just checking'
+     ##print(data2) #just checking
+     #============================================================
 
-
-#-----------Formatting prior to graph creation----------------
-
-cbar = False #Delete heatmap bar
-
-#Figure Sizing
-sns.set_theme(rc={'figure.figsize':(8.27, 11.7)})
-
-##Formatting boxes
-linewidths =2
-linecolor = "white"
-#-----------------------------------------------------------
-    
-
-    
-#Create heatmapfrom data set
-habitTracker = sns.heatmap(data=data2,
-            cbar=cbar,
-            linewidths=linewidths,
-            linecolor=linecolor,
-            cmap='Greens',
-            square = True,)#<= makes boxes perfectly square
+     axisArray = []
+     for i in range(days):
+          axisArray.append(i+1)
+     #print(axisArray)# just checking'
 
 
-#Axis Formatting
-habitTracker.set_title("Community Habits")
-habitTracker.set_xlabel("Names")
-habitTracker.xaxis.set_label_position("top")
-habitTracker.xaxis.set_ticks_position("top")
-habitTracker.set_yticklabels(habitTracker.get_yticklabels(), rotation=0,)
-habitTracker.set_yticklabels(axisArray)
-habitTracker.set_ylabel("Days")
+     #-----------Formatting prior to graph creation----------------
+
+     cbar = False #Delete heatmap bar
+
+     #Figure Sizing
+     sns.set_theme(rc={'figure.figsize':(6, 8)})
+
+     ##Formatting boxes
+     linewidths =2
+     linecolor = "white"
+     #-----------------------------------------------------------
+     
+
+     
+     #Create heatmapfrom data set
+     habitTracker = sns.heatmap(data=truncatedArray,
+               cbar=cbar,
+               linewidths=linewidths,
+               linecolor=linecolor,
+               cmap='Greens',
+               square = True,)#<= makes boxes perfectly square
 
 
-
-
-
+     #Axis Formatting
+     habitTracker.set_title("Community Habits")
+     habitTracker.set_xlabel("Names")
+     habitTracker.set_xticklabels(names)
+     habitTracker.xaxis.set_label_position("top")
+     habitTracker.xaxis.set_ticks_position("top")
+     habitTracker.set_yticklabels(habitTracker.get_yticklabels(), rotation=0,)
+     habitTracker.set_yticklabels(axisArray)
+     habitTracker.set_ylabel("Days")
 
 
 
-#Save Tracker as png
-fig = habitTracker.get_figure()
-fig.savefig("myTracker.png")
 
 
 
-plt.show()
+
+
+     #Save Tracker as png
+     fig = habitTracker.get_figure()
+     fig.savefig("myTracker.png")
+
+
+
+     plt.show()

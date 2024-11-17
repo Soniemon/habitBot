@@ -8,6 +8,7 @@ import datetime
 from reminder import reminder
 from discord.ext import commands #Implements detection and functionality for / commands
 from dotenv import load_dotenv
+from GroupTracker import *
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -122,13 +123,26 @@ async def checkin(ctx):
     f.writelines(data)
     f.close()
 
-"""
+
 @guildBot.command(name = "join")
 async def join(ctx):
-    guild = ctx.guild
-    member = ctx.author
+    member = ctx.author.name
+
+@guildBot.command(name="showGrid")
+async def showGrid(ctx):
+    filename = str(ctx.channel)
+    f = open(f"{filename}.txt", "r")
+    data = f.readlines()
+    names = []
+    userData = []
+    for items in data:
+        parts = items.partition(":")
+        names.append(parts[0])
+        userData.append(parts[2].strip())
+    groupGridShow(names, userData)
     
-"""
+    
+
 
 
 @guildBot.command(name = "removeHabit")

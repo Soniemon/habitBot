@@ -3,7 +3,8 @@
 import os
 import discord
 import datetime
-from habitBotFiles import reminder
+from mongo import *
+#from habitBotFiles import reminder
 from discord.ext import commands #Implements detection and functionality for / commands
 from dotenv import load_dotenv
 
@@ -25,15 +26,24 @@ try:
 except Exception as e:
     print(e)
 
-db = client.logs 
+db = client.habitTracker
+server_collection = db.server_collection
+user_collection = db.user_collection
+
 
 guildBot = commands.Bot(command_prefix="/", intents = discord.Intents.all()) #Flags anything beginning with a / as a command
 #all permissions
 intents = discord.Intents.all()
 #gives discord bot all permissions
-client = discord.Client(intents=intents)
 
+for guild in guildBot.guilds:
+    if not server_collection.find_one({'serverName' : str(guild.name)}):
+        addServer(serverName=str(guild.name))
 
+#print(db.find({'serverName' : {in : ['Adam']}})
+
+'''results = db.find({'serverName' : 'Jacob' },{'_id' : 1})
+print(str(results.next()).strip('{}').split()[1])'''
 
 @guildBot.event
 async def on_ready():
@@ -69,7 +79,6 @@ async def showCommands(ctx): #Ctx is a required parameter that contains informat
     /newHabit --> Set new habit \n\n----------------------------------------\n
     /deleteHabit --> Delete existing habit \n\n----------------------------------------\n
     /showStreak --> Show habit streaks \n\n----------------------------------------\n"""
-
     await ctx.send(response)
 
 @guildBot.command(name="newHabit")
@@ -88,11 +97,16 @@ async def newHabit(ctx, habit_name):
         member: discord.PermissionOverwrite(read_messages=True),
         }
 
-
+        if not server_collection.find_one({'habits' : habit_name}):
+            updateServer(GUILD,'',habit_name)
+        if not user_collection.find_one({'username' : str(member)}):
+            addUser(str(ctx.author))
+        if not user_collection.find_one({'habits' : { '$in' : [habit_name]}}):
+            updateUser(username=str(ctx.author),habit=habit_name, startDate='')
         await guild.create_text_channel(habit_name, category = category, overwrites=overwrites)
         
+        
     else:
-
         for category in guild.categories:
             if category.name == "Habits":
                 break
@@ -105,7 +119,17 @@ async def newHabit(ctx, habit_name):
                 await channel.set_permissions(member, overwrite = perms)
                 break
         
-       
+
+@guildBot.command(name = "join")
+async def join(ctx):
+    guild = ctx.guild
+    member = ctx.author
+    if not user_collection.find_one({'username' : str(member)}):
+        addUser(str(ctx.author))
+    if not user_collection.find_one({'habits' : { '$in' : [str(ctx.channel)]}}):
+        updateUser(username=str(ctx.author),habit=str(ctx.channel), startDate='')
+
+
 @guildBot.command(name = "removeHabit")
 async def removeHabit(ctx, habit_name):
     guild = ctx.guild
@@ -128,10 +152,10 @@ async def removeHabit(ctx, habit_name):
                
     
 
-@guildBot.command(name = "newReminder")
+'''@guildBot.command(name = "newReminder")
 async def newReminder(ctx, reminder_name, time, repeat):
 
-    remind = reminder(reminder_name, time, repeat)
+    remind = reminder(reminder_name, time, repeat)'''
 
 
 

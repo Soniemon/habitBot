@@ -1,4 +1,4 @@
-import datetime
+'''import datetime
 
 class reminder:
     def __init__(self, reminderName, time, days):
@@ -23,4 +23,4 @@ class reminder:
 
     }
     
-
+'''

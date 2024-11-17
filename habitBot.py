@@ -5,6 +5,7 @@ import discord
 import datetime
 from mongo import *
 #from habitBotFiles import reminder
+from reminder import reminder
 from discord.ext import commands #Implements detection and functionality for / commands
 from dotenv import load_dotenv
 
@@ -152,10 +153,27 @@ async def removeHabit(ctx, habit_name):
                
     
 
-'''@guildBot.command(name = "newReminder")
-async def newReminder(ctx, reminder_name, time, repeat):
+@guildBot.command(name = "newReminder")
+async def newReminder(ctx, name, when, repeat):
 
-    remind = reminder(reminder_name, time, repeat)'''
+    alert = reminder(name, when, repeat)
+    await ctx.channel.send(alert)
+
+
+@guildBot.command(name = "changeReminder")
+async def changeReminder(ctx, field, value):
+
+    if(field == "name"):
+
+        print("a")
+
+    elif(field == "time"):
+
+        print("b")
+
+    elif(field == "days"):
+
+        print("c")
 
 
 

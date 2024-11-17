@@ -9,8 +9,10 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-intents = discord.Intents.all()
-client = discord.Client(intents=intents)
+#all permissions
+#intents = discord.Intents.all()
+#gives discord bot all permissions
+#client = discord.Client(intents=intents)
 
 # @client.event
 # async def on_ready():
@@ -40,7 +42,7 @@ guildBot = commands.Bot(command_prefix="/", intents = discord.Intents.all()) #Fl
 @guildBot.command(name="showCommands") #Behavior when /help is detected in chat
 async def help(ctx): #Ctx is a required parameter that contains information about the message, including the channel and guild and user that called the command
 
-    if message.author == client.user:
+    if ctx.author == guildBot.user:
         return
 
     response = """/showGrid --> Displays user's personal habit grid \n\n----------------------------------------\n

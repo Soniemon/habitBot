@@ -2,6 +2,9 @@
 
 import os
 import discord
+import datetime
+from habitBotFiles import reminder
+from discord.ext import commands #Implements detection and functionality for / commands
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,6 +27,7 @@ except Exception as e:
 
 db = client.logs 
 
+guildBot = commands.Bot(command_prefix="/", intents = discord.Intents.all()) #Flags anything beginning with a / as a command
 #all permissions
 intents = discord.Intents.all()
 #gives discord bot all permissions
@@ -31,36 +35,104 @@ client = discord.Client(intents=intents)
 
 
 
-@client.event
+@guildBot.event
 async def on_ready():
-    for guild in client.guilds:
+    print(f'{guildBot.user} has connected to Discord!')
+
+    for guild in guildBot.guilds:
         if guild.name == GUILD:
             break
+
+
+
+    existing_category = discord.utils.get(guild.categories, name = "Habits")
+    if not existing_category:
+        print(f'Creating a new category: {"Habits"}')
+        category = await guild.create_category("Habits")
+        print(f'Creating a new channel: {"Controller"}')
+        await guild.create_text_channel("Controller", category=category)
     
-    print("We're Here!")
-    db.server_opened.insert_one(
-        {
-            "Time": "1"
-        }
-    )
-
-    print(f'{client.user} is connected to the following guild:\n'
-          f'{guild.name}(id: {guild.id})'
-    )
-    
-    #print names of all guild members
-    members = '\n - '.join([member.name for member in guild.members])
-    print(f'Guild Members:\n - {members}')
+   
 
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
+
+@guildBot.command(name="showCommands") #Behavior when /help is detected in chat
+async def showCommands(ctx): #Ctx is a required parameter that contains information about the message, including the channel and guild and user that called the command
+
+    if ctx.author == guildBot.user:
         return
 
-    if 'hello' in message.content.lower():
-        await message.channel.send(message.author.display_name)
+    response = """/showGrid --> Displays user's personal habit grid \n\n----------------------------------------\n
+    /newReminder --> Set habit reminder timing \n\n----------------------------------------\n
+    /changeReminder --> Adjust existing reminder timing \n\n----------------------------------------\n
+    /showShared --> Show shared habit grid \n\n----------------------------------------\n
+    /newHabit --> Set new habit \n\n----------------------------------------\n
+    /deleteHabit --> Delete existing habit \n\n----------------------------------------\n
+    /showStreak --> Show habit streaks \n\n----------------------------------------\n"""
+
+    await ctx.send(response)
+
+@guildBot.command(name="newHabit")
+async def newHabit(ctx, habit_name):
+    guild = ctx.guild
+    member = ctx.author
+    existing_habit = discord.utils.get(guild.channels, name = habit_name)
+    if not existing_habit:
+        print(f'Creating a new channel for the habit: {habit_name}')
+
+        for category in guild.categories:
+            if category.name == "Habits":
+                break
+
+        overwrites = {guild.default_role: discord.PermissionOverwrite(read_messages=False),
+        member: discord.PermissionOverwrite(read_messages=True),
+        }
+
+
+        await guild.create_text_channel(habit_name, category = category, overwrites=overwrites)
+        
+    else:
+
+        for category in guild.categories:
+            if category.name == "Habits":
+                break
+
+        for channel in category.channels:
+            if channel.name == habit_name:
+                perms = channel.overwrites_for(member)
+                perms.send_messages = True
+                perms.read_messages = True
+                await channel.set_permissions(member, overwrite = perms)
+                break
+        
+       
+@guildBot.command(name = "removeHabit")
+async def removeHabit(ctx, habit_name):
+    guild = ctx.guild
+    member = ctx.author
+    existing_habit = discord.utils.get(guild.channels, name = habit_name)
+    if existing_habit:
+
+        for category in guild.categories:
+           if category.name == "Habits":
+               break
+        
+
+        for channel in category.channels:
+            if channel.name == habit_name:
+                perms = channel.overwrites_for(member)
+                perms.send_messages = False
+                perms.read_messages = False
+                await channel.set_permissions(member, overwrite = perms)
+                break
+               
+    
+
+@guildBot.command(name = "newReminder")
+async def newReminder(ctx, reminder_name, time, repeat):
+
+    remind = reminder(reminder_name, time, repeat)
 
 
 
-client.run(TOKEN)
+guildBot.run(TOKEN)

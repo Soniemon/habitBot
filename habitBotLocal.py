@@ -15,12 +15,39 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
 
+"""
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+uri = "mongodb+srv://officialbrandongomez:TrNDQVKztinNMINs@habittracker.3yibe.mongodb.net/?retryWrites=true&w=majority&appName=HabitTracker"
+# Create a new client and connect to the server
+client = MongoClient(uri)
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
+db = client.habitTracker
+server_collection = db.server_collection
+user_collection = db.user_collection
+"""
+
 guildBot = commands.Bot(command_prefix="/", intents = discord.Intents.all()) #Flags anything beginning with a / as a command
 #all permissions
 #gives discord bot all permissions
+
+"""
+for guild in guildBot.guilds:
+    if not server_collection.find_one({'serverName' : str(guild.name)}):
+        addServer(serverName=str(guild.name))
+"""
         
 
 #print(db.find({'serverName' : {in : ['Adam']}})
+
+'''results = db.find({'serverName' : 'Jacob' },{'_id' : 1})
+print(str(results.next()).strip('{}').split()[1])'''
 
 @guildBot.event
 async def on_ready():
@@ -75,7 +102,7 @@ async def newHabit(ctx, habit_name):
         f.close()
 
         f = open(habit_name + ".txt", "a")
-        f.write(member + ":")
+        f.write(member.display_name + ":")
         f.close()
 
 
@@ -87,13 +114,21 @@ async def newHabit(ctx, habit_name):
         member: discord.PermissionOverwrite(read_messages=True),
         }
 
+        """
+        if not server_collection.find_one({'habits' : habit_name}):
+            updateServer(GUILD,'',habit_name)
+        if not user_collection.find_one({'username' : str(member)}):
+            addUser(str(ctx.author))
+        if not user_collection.find_one({'habits' : { '$in' : [habit_name]}}):
+            updateUser(username=str(ctx.author),habit=habit_name, startDate='')"""
         await guild.create_text_channel(habit_name, category = category, overwrites=overwrites)
         
         
     else:
 
         f = open(habit_name + ".txt", "a")
-        f.write("\n" + member + ":")
+        f.write("\n")
+        f.write(member.display_name + ":")
         f.close()
 
         for category in guild.categories:
@@ -133,25 +168,18 @@ async def checkin(ctx):
     f.close()
 
 
+        
+"""
 @guildBot.command(name = "join")
 async def join(ctx):
-    member = ctx.author.name
-
-@guildBot.command(name="showGrid")
-async def showGrid(ctx):
-    filename = str(ctx.channel)
-    f = open(f"{filename}.txt", "r")
-    data = f.readlines()
-    names = []
-    userData = []
-    for items in data:
-        parts = items.partition(":")
-        names.append(parts[0])
-        userData.append(parts[2].strip())
-    groupGridShow(names, userData)
+    guild = ctx.guild
+    member = ctx.author
     
-    
-
+    if not user_collection.find_one({'username' : str(member)}):
+        addUser(str(ctx.author))
+    if not user_collection.find_one({'habits' : { '$in' : [str(ctx.channel)]}}):
+        updateUser(username=str(ctx.author),habit=str(ctx.channel), startDate='')
+"""
 
 
 @guildBot.command(name = "removeHabit")
@@ -177,21 +205,35 @@ async def removeHabit(ctx, habit_name):
                 perms.read_messages = False
                 await channel.set_permissions(member, overwrite = perms)
 
+                f = open(habit_name + ".txt", "r")
+                lines = f.readlines()
+                f.close()
+                f = open(habit_name + ".txt", "w")
+                for line in lines:
+                    if not member.display_name in line.strip("\n"):
+                        f.write(line)
+                f.close
+
+
+                f = open(habit_name + ".txt", "r")
+                all = f.read()
+                f.close()
+                deleteChannel = True
                 for members in guild.members:
-                    if(len(channel.members) == 1):
+                    if members.display_name in all:
+                        deleteChannel = False
+                        break
 
-                        await channel.delete()
-
-                        with open("habits.txt", "r") as f:
-                            lines = f.readlines()
-                        with open("habits.txt", "w") as f:
-                            for line in lines:
-                                if line.strip("\n") != (habit_name + "\n"):
-                                    f.write(line)
-                            f.close()
-
-
-                break
+                if(deleteChannel):
+                    await channel.delete()
+                    with open("habits.txt", "r") as f:
+                        lines = f.readlines()
+                        f.close()
+                    with open("habits.txt", "w") as f:
+                        for line in lines:
+                            if line.strip("\n") != habit_name:
+                                f.write(line)
+                        f.close()
                
     
 

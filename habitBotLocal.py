@@ -178,19 +178,17 @@ async def removeHabit(ctx, habit_name):
                 await channel.set_permissions(member, overwrite = perms)
 
                 for members in guild.members:
-                
+                    if(len(channel.members) == 1):
 
-                if(len(channel.members) == 1):
+                        await channel.delete()
 
-                    await channel.delete()
-
-                    with open("habits.txt", "r") as f:
-                        lines = f.readlines()
-                    with open("habits.txt", "w") as f:
-                        for line in lines:
-                            if line.strip("\n") != (habit_name + "\n"):
-                                f.write(line)
-                        f.close()
+                        with open("habits.txt", "r") as f:
+                            lines = f.readlines()
+                        with open("habits.txt", "w") as f:
+                            for line in lines:
+                                if line.strip("\n") != (habit_name + "\n"):
+                                    f.write(line)
+                            f.close()
 
 
                 break

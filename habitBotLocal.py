@@ -1,4 +1,4 @@
-#habitBot.py
+#habitBotLocal.py
 
 import os
 import discord
@@ -40,7 +40,7 @@ async def on_ready():
         await guild.create_text_channel("Controller", category=category)
         #overwrites = {guild.default_role: discord.PermissionOverwrite(read_messages=False),}
         #await guild.create_text_channel("Memory", category=category, overwrites=overwrites)
-        f = open("habits.txt",  "a")
+        f = open("habits.txt",  "w")
         f.close()
 
    
@@ -67,11 +67,15 @@ async def newHabit(ctx, habit_name):
     guild = ctx.guild
     member = ctx.author
     existing_habit = discord.utils.get(guild.channels, name = habit_name)
+
     if not existing_habit:
         print(f'Creating a new channel for the habit: {habit_name}')
         f = open("habits.txt", "a")
-        f.write(habit_name)
-        f.write(",")
+        f.write(habit_name + "\n")
+        f.close()
+
+        f = open(habit_name + ".txt", "a")
+        f.write(member + ":")
         f.close()
 
 
@@ -87,6 +91,11 @@ async def newHabit(ctx, habit_name):
         
         
     else:
+
+        f = open(habit_name + ".txt", "a")
+        f.write("\n" + member + ":")
+        f.close()
+
         for category in guild.categories:
             if category.name == "Habits":
                 break
@@ -149,6 +158,10 @@ async def showGrid(ctx):
 async def removeHabit(ctx, habit_name):
     guild = ctx.guild
     member = ctx.author
+
+    
+
+
     existing_habit = discord.utils.get(guild.channels, name = habit_name)
     if existing_habit:
 
@@ -164,10 +177,20 @@ async def removeHabit(ctx, habit_name):
                 perms.read_messages = False
                 await channel.set_permissions(member, overwrite = perms)
 
-                if(len(channel.users) == 1):
-                    temp = open("habits.txt", "r")
-                    
+                for members in guild.members:
+                
 
+                if(len(channel.members) == 1):
+
+                    await channel.delete()
+
+                    with open("habits.txt", "r") as f:
+                        lines = f.readlines()
+                    with open("habits.txt", "w") as f:
+                        for line in lines:
+                            if line.strip("\n") != (habit_name + "\n"):
+                                f.write(line)
+                        f.close()
 
 
                 break

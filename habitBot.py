@@ -2,6 +2,8 @@
 
 import os
 import discord
+import datetime
+from habitBotFiles import reminder
 from discord.ext import commands #Implements detection and functionality for / commands
 from dotenv import load_dotenv
 
@@ -39,8 +41,8 @@ async def showCommands(ctx): #Ctx is a required parameter that contains informat
         return
 
     response = """/showGrid --> Displays user's personal habit grid \n\n----------------------------------------\n
-    /newRemind --> Set habit reminder timing \n\n----------------------------------------\n
-    /changeRemind --> Adjust existing reminder timing \n\n----------------------------------------\n
+    /newReminder --> Set habit reminder timing \n\n----------------------------------------\n
+    /changeReminder --> Adjust existing reminder timing \n\n----------------------------------------\n
     /showShared --> Show shared habit grid \n\n----------------------------------------\n
     /newHabit --> Set new habit \n\n----------------------------------------\n
     /deleteHabit --> Delete existing habit \n\n----------------------------------------\n
@@ -55,10 +57,6 @@ async def newHabit(ctx, habit_name):
     existing_habit = discord.utils.get(guild.channels, name = habit_name)
     if not existing_habit:
         print(f'Creating a new channel for the habit: {habit_name}')
-
-        # for guild in guildBot.guilds:
-        #     if guild.name == GUILD:
-        #         break
 
         for category in guild.categories:
             if category.name == "Habits":
@@ -86,8 +84,32 @@ async def newHabit(ctx, habit_name):
                 break
         
        
+@guildBot.command(name = "removeHabit")
+async def removeHabit(ctx, habit_name):
+    guild = ctx.guild
+    member = ctx.author
+    existing_habit = discord.utils.get(guild.channels, name = habit_name)
+    if existing_habit:
 
+        for category in guild.categories:
+           if category.name == "Habits":
+               break
+        
 
+        for channel in category.channels:
+            if channel.name == habit_name:
+                perms = channel.overwrites_for(member)
+                perms.send_messages = False
+                perms.read_messages = False
+                await channel.set_permissions(member, overwrite = perms)
+                break
+               
+    
+
+@guildBot.command(name = "newReminder")
+async def newReminder(ctx, reminder_name, time, repeat):
+
+    remind = reminder(reminder_name, time, repeat)
 
 
 

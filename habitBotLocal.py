@@ -14,39 +14,12 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
 
-"""
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-uri = "mongodb+srv://officialbrandongomez:TrNDQVKztinNMINs@habittracker.3yibe.mongodb.net/?retryWrites=true&w=majority&appName=HabitTracker"
-# Create a new client and connect to the server
-client = MongoClient(uri)
-# Send a ping to confirm a successful connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-
-db = client.habitTracker
-server_collection = db.server_collection
-user_collection = db.user_collection
-"""
-
 guildBot = commands.Bot(command_prefix="/", intents = discord.Intents.all()) #Flags anything beginning with a / as a command
 #all permissions
 #gives discord bot all permissions
-
-"""
-for guild in guildBot.guilds:
-    if not server_collection.find_one({'serverName' : str(guild.name)}):
-        addServer(serverName=str(guild.name))
-"""
         
 
 #print(db.find({'serverName' : {in : ['Adam']}})
-
-'''results = db.find({'serverName' : 'Jacob' },{'_id' : 1})
-print(str(results.next()).strip('{}').split()[1])'''
 
 @guildBot.event
 async def on_ready():
@@ -109,13 +82,6 @@ async def newHabit(ctx, habit_name):
         member: discord.PermissionOverwrite(read_messages=True),
         }
 
-        """
-        if not server_collection.find_one({'habits' : habit_name}):
-            updateServer(GUILD,'',habit_name)
-        if not user_collection.find_one({'username' : str(member)}):
-            addUser(str(ctx.author))
-        if not user_collection.find_one({'habits' : { '$in' : [habit_name]}}):
-            updateUser(username=str(ctx.author),habit=habit_name, startDate='')"""
         await guild.create_text_channel(habit_name, category = category, overwrites=overwrites)
         
         
@@ -132,16 +98,36 @@ async def newHabit(ctx, habit_name):
                 await channel.set_permissions(member, overwrite = perms)
                 break
         
+@guildBot.command(name="checkin")
+async def checkin(ctx):
+    member = ctx.author.name
+    filename=str(ctx.channel)
+    f = open(f"{filename}.txt")
+    data = f.readlines()
+    iter=0
+    for item in data:
+        if item.startswith(str(member)):
+            marker = ''
+            newStr = '1'
+            i = -3
+            while(marker != ':'):
+                newStr = item[i] + newStr
+                i -= 1
+                marker = item[i]
+            newStr = str(member) + ':' + newStr + '\n'
+            data[iter] = newStr
+        iter+=1
+    f.close()
+    f = open(f"{filename}.txt", "w")
+    f.writelines(data)
+    f.close()
+
 """
 @guildBot.command(name = "join")
 async def join(ctx):
     guild = ctx.guild
     member = ctx.author
     
-    if not user_collection.find_one({'username' : str(member)}):
-        addUser(str(ctx.author))
-    if not user_collection.find_one({'habits' : { '$in' : [str(ctx.channel)]}}):
-        updateUser(username=str(ctx.author),habit=str(ctx.channel), startDate='')
 """
 
 

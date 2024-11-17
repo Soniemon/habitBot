@@ -8,6 +8,7 @@ import datetime
 from reminder import reminder
 from discord.ext import commands #Implements detection and functionality for / commands
 from dotenv import load_dotenv
+from GroupTracker import *
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -141,6 +142,32 @@ async def newHabit(ctx, habit_name):
                 perms.read_messages = True
                 await channel.set_permissions(member, overwrite = perms)
                 break
+        
+@guildBot.command(name="checkin")
+async def checkin(ctx):
+    member = ctx.author.name
+    filename=str(ctx.channel)
+    f = open(f"{filename}.txt")
+    data = f.readlines()
+    iter=0
+    for item in data:
+        if item.startswith(str(member)):
+            marker = ''
+            newStr = '1'
+            i = -3
+            while(marker != ':'):
+                newStr = item[i] + newStr
+                i -= 1
+                marker = item[i]
+            newStr = str(member) + ':' + newStr + '\n'
+            data[iter] = newStr
+        iter+=1
+    f.close()
+    f = open(f"{filename}.txt", "w")
+    f.writelines(data)
+    f.close()
+
+
         
 """
 @guildBot.command(name = "join")

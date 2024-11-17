@@ -3,7 +3,7 @@
 import os
 import discord
 import datetime
-from habitBotFiles import reminder
+from reminder import reminder
 from discord.ext import commands #Implements detection and functionality for / commands
 from dotenv import load_dotenv
 
@@ -11,29 +11,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-
-
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-uri = "mongodb+srv://officialbrandongomez:TrNDQVKztinNMINs@habittracker.3yibe.mongodb.net/?retryWrites=true&w=majority&appName=HabitTracker"
-# Create a new client and connect to the server
-client = MongoClient(uri)
-# Send a ping to confirm a successful connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-
-db = client.logs 
-
 guildBot = commands.Bot(command_prefix="/", intents = discord.Intents.all()) #Flags anything beginning with a / as a command
-#all permissions
-intents = discord.Intents.all()
-#gives discord bot all permissions
-client = discord.Client(intents=intents)
-
-
 
 @guildBot.event
 async def on_ready():
@@ -129,9 +107,26 @@ async def removeHabit(ctx, habit_name):
     
 
 @guildBot.command(name = "newReminder")
-async def newReminder(ctx, reminder_name, time, repeat):
+async def newReminder(ctx, name, when, repeat):
 
-    remind = reminder(reminder_name, time, repeat)
+    alert = reminder(name, when, repeat)
+    await ctx.channel.send(alert)
+
+
+@guildBot.command(name = "changeReminder")
+async def changeReminder(ctx, field, value):
+
+    if(field == "name"):
+
+        print("a")
+
+    elif(field == "time"):
+
+        print("b")
+
+    elif(field == "days"):
+
+        print("c")
 
 
 
